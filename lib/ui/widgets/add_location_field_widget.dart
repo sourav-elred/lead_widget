@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:lead_widget/screens/add_location_screen.dart';
-import 'package:lead_widget/viewModel/location_view_model.dart';
+import '../../constants/assets_constants.dart';
+import '../screens/add_location_screen.dart';
+import '../../viewModel/location_view_model.dart';
 import 'package:provider/provider.dart';
 
 class AddLocationField extends StatelessWidget {
@@ -13,16 +14,9 @@ class AddLocationField extends StatelessWidget {
       builder: (context, value, child) => Container(
         height: 40,
         decoration: ShapeDecoration(
-          // color: value.currentlySelectedLocation == LocationType.googleLocation
-          //     ? const Color(0XFF147BFF)
-          //     : null,
           shape: RoundedRectangleBorder(
             side: const BorderSide(
               width: 1,
-              // color:
-              //     value.currentlySelectedLocation == LocationType.googleLocation
-              //         ? const Color(0XFF147BFF)
-              //         : Colors.white,
               color: Colors.white,
             ),
             borderRadius: BorderRadius.circular(59),
@@ -34,7 +28,7 @@ class AddLocationField extends StatelessWidget {
             children: [
               if (value.currentlySelectedLocation !=
                   LocationType.googleLocation)
-                SvgPicture.asset('assets/icons/search.svg'),
+                SvgPicture.asset(AssetsConstants.searchIcon),
               const SizedBox(width: 8),
               Expanded(
                 child: GestureDetector(

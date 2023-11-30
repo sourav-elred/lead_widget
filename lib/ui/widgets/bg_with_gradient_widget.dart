@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/assets_constants.dart';
 
 class BGWithGradient extends StatelessWidget {
   const BGWithGradient({super.key});
@@ -9,7 +10,7 @@ class BGWithGradient extends StatelessWidget {
       decoration: const BoxDecoration(
         color: Colors.white,
         image: DecorationImage(
-          image: AssetImage('assets/images/lead_bg.jpeg'),
+          image: AssetImage(AssetsConstants.leadBackground),
           fit: BoxFit.cover,
         ),
       ),

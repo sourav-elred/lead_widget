@@ -1,7 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:lead_widget/services/web_service.dart';
+import '../constants/api_service_constants.dart';
+import '../services/web_service.dart';
 
 enum LocationType { currentLocation, remoteLocation, googleLocation }
 
@@ -35,11 +36,11 @@ class LocationViewModel extends ChangeNotifier {
   List<dynamic> placesList = [];
   void getPlacesSuggestions() async {
     Uri uri = Uri.https(
-      "maps.googleapis.com",
-      "maps/api/place/autocomplete/json",
+      ApiServiceConstants.authority,
+      ApiServiceConstants.unencodedPath,
       {
         "input": editingController.text,
-        "key": "AIzaSyAROpxxRmrXiah-FooutbY7rmY1m8HnucQ",
+        "key": ApiServiceConstants.apiKey,
       },
     );
 
@@ -62,6 +63,7 @@ class LocationViewModel extends ChangeNotifier {
       placesList.clear();
       notifyListeners();
     }
+    getPlacesSuggestions();
   }
 
   void onCrossIconTap() {
@@ -82,7 +84,6 @@ class LocationViewModel extends ChangeNotifier {
   void onClearIconTapInAddLocation() {
     editingController.clear();
     placesList.clear();
-    // currentlySelectedLocation = LocationType.currentLocation;
     notifyListeners();
   }
 

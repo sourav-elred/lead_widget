@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lead_widget/viewModel/location_view_model.dart';
-import 'package:provider/provider.dart';
 
 class ElRedButton extends StatelessWidget {
   const ElRedButton({
