@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:lead_widget/models/location_model.dart';
+import 'package:lead_widget/models/suggestion_model.dart';
 import '../constants/api_service_constants.dart';
 import '../services/web_service.dart';
 
@@ -9,19 +12,19 @@ enum LocationType { currentLocation, remoteLocation, googleLocation }
 class LocationViewModel extends ChangeNotifier {
   late TextEditingController editingController;
   LocationType currentlySelectedLocation = LocationType.currentLocation;
-  String initialGoogleLocation = '';
-  String? currentGoogleLocation;
+  late Location? initialGoogleLocation;
+  Location? currentGoogleLocation;
   bool isButtonDisabled = false;
-  bool suggestionSelected = false;
+  Suggestion? currentlySelectedSuggestion;
   bool shouldShowClearIcon = false;
+  bool shouldShowNoResultFound = false;
 
   void initialize(TextEditingController controller) {
     editingController = controller;
-    editingController.text = currentGoogleLocation ?? '';
-    initialGoogleLocation = currentGoogleLocation ?? '';
-
+    editingController.text = currentGoogleLocation?.fullAddress ?? '';
+    initialGoogleLocation = currentGoogleLocation;
     isButtonDisabled = false;
-    suggestionSelected = false;
+    currentlySelectedSuggestion = null;
     editingController.addListener(doneButtonListner);
   }
 
@@ -29,24 +32,35 @@ class LocationViewModel extends ChangeNotifier {
     currentlySelectedLocation = locationType;
     currentGoogleLocation = null;
     isButtonDisabled = false;
-    suggestionSelected = false;
+    currentlySelectedSuggestion = null;
     notifyListeners();
   }
 
-  List<dynamic> placesList = [];
+  List<Suggestion> placesList = [];
   void getPlacesSuggestions() async {
     Uri uri = Uri.https(
       ApiServiceConstants.authority,
-      ApiServiceConstants.unencodedPath,
+      ApiServiceConstants.placesPredictionPath,
       {
         "input": editingController.text,
         "key": ApiServiceConstants.apiKey,
       },
     );
 
-    String? response = await WebService.fetchUrl(uri);
+    dynamic response = await WebService.fetchUrl(uri);
     if (response != null) {
-      placesList = jsonDecode(response)['predictions'];
+      placesList = jsonDecode(response)['predictions']
+          .map<Suggestion>((p) => Suggestion(p['place_id'], p['description']))
+          .toList();
+      log('placesList: $placesList');
+      if (placesList.isEmpty) {
+        shouldShowNoResultFound = true;
+      } else {
+        shouldShowNoResultFound = false;
+      }
+
+      log('shouldShowNoResultFound == > $shouldShowNoResultFound');
+
       notifyListeners();
     }
   }
@@ -63,40 +77,79 @@ class LocationViewModel extends ChangeNotifier {
       placesList.clear();
       notifyListeners();
     }
-    getPlacesSuggestions();
+    if (currentlySelectedSuggestion != null) {
+      isButtonDisabled = false;
+      shouldShowClearIcon = true;
+      notifyListeners();
+    }
   }
 
   void onCrossIconTap() {
-    initialGoogleLocation = '';
+    initialGoogleLocation = null;
     currentGoogleLocation = null;
     currentlySelectedLocation = LocationType.currentLocation;
     notifyListeners();
   }
 
-  void onLocationSuggestionTap(String locationSuggestion) {
-    editingController.text = locationSuggestion;
+  void onLocationSuggestionTap(Suggestion locationSuggestion) {
+    editingController.text = locationSuggestion.description;
     isButtonDisabled = false;
     placesList.clear();
-    suggestionSelected = true;
+    currentlySelectedSuggestion = locationSuggestion;
     notifyListeners();
   }
 
   void onClearIconTapInAddLocation() {
     editingController.clear();
     placesList.clear();
+    currentlySelectedSuggestion = null;
+    shouldShowNoResultFound = false;
     notifyListeners();
   }
 
   void changeCurrentGoogleLocation() async {
-    if (editingController.text.isEmpty) {
+    if (currentlySelectedSuggestion != null) {
+      final locationData =
+          await fetchLocationData(currentlySelectedSuggestion!.placeId);
+      currentGoogleLocation = locationData;
+      log('location ==> ${locationData.toString()}');
+      currentlySelectedLocation = LocationType.googleLocation;
+    } else {
       currentGoogleLocation = null;
       currentlySelectedLocation = LocationType.currentLocation;
-    } else {
-      currentGoogleLocation = editingController.text;
-      currentlySelectedLocation = LocationType.googleLocation;
     }
     placesList.clear();
     isButtonDisabled = false;
     notifyListeners();
+  }
+
+  Future<Location?> fetchLocationData(String placeId) async {
+    try {
+      Uri uri = Uri.https(
+        ApiServiceConstants.authority,
+        ApiServiceConstants.placesDetailsPath,
+        {
+          "place_id": placeId,
+          "key": ApiServiceConstants.apiKey,
+        },
+      );
+
+      dynamic response = await WebService.fetchUrl(uri);
+      if (response != null) {
+        final data = jsonDecode(response)['result'];
+
+        return Location(
+          data['address_components'][0]['long_name'],
+          data['address_components'][3]['long_name'],
+          data['geometry']['location']['lat'],
+          data['geometry']['location']['lng'],
+          data['address_components'][4]['long_name'],
+          data['formatted_address'],
+        );
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+    return null;
   }
 }

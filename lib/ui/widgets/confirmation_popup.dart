@@ -54,6 +54,7 @@ Future<dynamic> buildConfirmationPopup(BuildContext context) {
                         child: ElRedButton(
                           text: 'Ok',
                           onTap: () {
+                            FocusScope.of(context).unfocus();
                             Navigator.of(context).pop();
                             Navigator.of(context).pop();
                           },

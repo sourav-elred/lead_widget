@@ -38,6 +38,9 @@ dependencies:
   flutter_svg: ^2.0.5
   provider: ^6.1.1
   http: ^0.13.6
+  flutter_google_places: ^0.3.0
+  google_maps_services_dart: ^1.17.1
+  url_launcher: any
 
 dev_dependencies:
   flutter_test:

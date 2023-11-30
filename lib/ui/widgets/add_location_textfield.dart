@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import '../../constants/assets_constants.dart';
 import '../../viewModel/location_view_model.dart';
@@ -15,6 +16,12 @@ class AddLocationTextField extends StatelessWidget {
         height: 45,
         child: TextField(
           controller: value.editingController,
+          onChanged: (val) {
+            value.getPlacesSuggestions();
+          },
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp("[0-9a-zA-Z ]")),
+          ], //
           decoration: InputDecoration(
             isDense: true,
             contentPadding: EdgeInsets.zero,

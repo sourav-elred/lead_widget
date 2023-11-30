@@ -17,15 +17,16 @@ class CustomAppbarWidget extends StatelessWidget with PreferredSizeWidget {
         onTap: () {
           if ((_locationViewModel.currentGoogleLocation == null &&
                   _locationViewModel.editingController.text.isNotEmpty) &&
-              _locationViewModel.suggestionSelected) {
+              _locationViewModel.currentlySelectedSuggestion != null) {
             buildConfirmationPopup(context);
             return;
           }
-          if (_locationViewModel.initialGoogleLocation.isNotEmpty &&
+          if (_locationViewModel.initialGoogleLocation != null &&
               _locationViewModel.editingController.text.isEmpty) {
             buildConfirmationPopup(context);
             return;
           } else {
+            FocusScope.of(context).unfocus();
             Navigator.of(context).pop();
           }
         },

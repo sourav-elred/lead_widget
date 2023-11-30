@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class WebService {
-  static Future<String?> fetchUrl(Uri url,
+  static Future<dynamic> fetchUrl(Uri url,
       {Map<String, String>? headers}) async {
     try {
       final response = await http.get(url, headers: headers);

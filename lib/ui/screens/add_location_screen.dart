@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:lead_widget/ui/screens/main_screen.dart';
 import '../../viewModel/location_view_model.dart';
 import '../widgets/add_location_textfield.dart';
 import '../widgets/custom_appbar_widget.dart';
@@ -30,31 +33,41 @@ class _AddLocationScreenState extends State<AddLocationScreen> {
     super.dispose();
   }
 
-  void onDoneButtonTap(LocationViewModel value) {
-    if (value.initialGoogleLocation.isEmpty &&
+  void onDoneButtonTap(LocationViewModel value, BuildContext context) {
+    if (value.initialGoogleLocation == null &&
         value.editingController.text.isEmpty) {
+      FocusScope.of(context).unfocus();
       Navigator.of(context).pop();
+
       return;
     } else {
       value.changeCurrentGoogleLocation();
+      FocusScope.of(context).unfocus();
       Navigator.of(context).pop();
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final locationVM = context.watch<LocationViewModel>();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: CustomAppbarWidget(locationViewModel: _locationViewModel),
       body: Column(
         children: [
           const AddLocationTextField(),
-          const SuggestionDropdownWidget(),
+          if (!locationVM.shouldShowNoResultFound) ...[
+            const SuggestionDropdownWidget(),
+          ] else ...[
+            const Text('No Result found'),
+            const Spacer(),
+          ],
           Consumer<LocationViewModel>(builder: (context, value, child) {
             return ElRedButton(
               text: 'Done',
-              onTap:
-                  value.isButtonDisabled ? null : () => onDoneButtonTap(value),
+              onTap: value.isButtonDisabled
+                  ? null
+                  : () => onDoneButtonTap(value, context),
             );
           }),
         ],

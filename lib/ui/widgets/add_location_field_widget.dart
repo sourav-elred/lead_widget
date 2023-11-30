@@ -38,7 +38,7 @@ class AddLocationField extends StatelessWidget {
                     ));
                   },
                   child: Text(
-                    value.currentGoogleLocation ?? 'Add location',
+                    value.currentGoogleLocation?.fullAddress ?? 'Add location',
                     style: const TextStyle(
                       overflow: TextOverflow.ellipsis,
                       color: Colors.white,
